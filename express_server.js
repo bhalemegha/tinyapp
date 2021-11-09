@@ -11,7 +11,19 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-app.use(express.urlencoded({extended : true}));
+function generateRandomString() {
+  var str = '';
+  var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  var charactersLength = 6;
+  for (var i = 0; i < charactersLength; i++) {
+    str += characters.charAt(Math.floor(Math.random() *
+    characters.length));    
+  }
+  return str;
+}
+
+generateRandomString();
+app.use(express.urlencoded({ extended: true })); //Used for body parser
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -29,12 +41,12 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const templateVars = { urls : urlDatabase };
+  const templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: `${urlDatabase.b2xVn2}`};
+  const templateVars = { shortURL: req.params.shortURL, longURL: `${urlDatabase.b2xVn2}` };
   res.render("urls_show", templateVars);
 });
 

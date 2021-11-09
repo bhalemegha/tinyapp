@@ -54,8 +54,8 @@ app.get("/urls", (req, res) => {
 
 
 app.get("/urls/:shortURL", (req, res) => {
-  const shortURL  = 'b2xVn2';
-  const templateVars = { shortURL: shortURL, longURL: `${urlDatabase.b2xVn2}` };
+  const shortURL = req.params['shortURL'];
+  const templateVars = { shortURL: shortURL, longURL: `${urlDatabase[shortURL]}` };
   res.render("urls_show", templateVars);
 });
 
@@ -63,6 +63,13 @@ app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params['shortURL'];
   const longURL = urlDatabase[shortURL];
   res.redirect(longURL);
+});
+
+app.post("/urls/:shortURL",(req,res) =>{
+  const shortURL = req.params['shortURL'];
+  console.log("Updating " + shortURL + " for " + urlDatabase[shortURL]);
+  urlDatabase[shortURL] = req.body.longURL;
+  res.redirect("/urls");
 });
 
 app.post("/urls/:shortURL/delete",(req,res) =>{

@@ -20,10 +20,13 @@
       </thead>
       <tbody>
         <% for(let url in urls) { %>
-          <tr>
-            <td><%= url %></td>
-            <td><%= urls[url] %></td>
+          <form class="form-inline" method="POST" action="/urls/<%= url %>/delete">
+            <tr>
+             <td><%= url %></td>
+              <td><%= urls[url] %></td>
+              <td><button type="submit" class="btn btn-primary">Delete</button></td>
           </tr>
+        </form>
         <% } %>
       </tbody>
     </table>

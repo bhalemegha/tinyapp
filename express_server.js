@@ -43,7 +43,7 @@ app.get("/urls/new", (req, res) => {
 app.post("/urls", (req, res) => {
   const shortStr = generateRandomString();
    urlDatabase[shortStr] = req.body['longURL'];
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+   res.redirect("/urls");
 });
 
 
@@ -59,14 +59,15 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
-
-
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params['shortURL'];
   const longURL = urlDatabase[shortURL];
   res.redirect(longURL);
+});
+
+app.post("/urls/:shortURL/delete",(req,res) =>{
+  const shortURL = req.params['shortURL'];
+  console.log("Deleting " + shortURL + " for " + urlDatabase[shortURL]);
+  delete urlDatabase[shortURL];
+  res.redirect("/urls");
 });

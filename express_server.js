@@ -11,6 +11,7 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+//Getting random string of length 6
 function generateRandomString() {
   var str = '';
   var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -22,7 +23,6 @@ function generateRandomString() {
   return str;
 }
 
-generateRandomString();
 app.use(express.urlencoded({ extended: true })); //Used for body parser
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -40,22 +40,32 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
+app.post("/urls", (req, res) => {
+  const shortStr = generateRandomString();
+   urlDatabase[shortStr] = req.body['longURL'];
+  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+});
+
+
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
 
+
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: `${urlDatabase.b2xVn2}` };
+  const shortURL  = 'b2xVn2';
+  const templateVars = { shortURL: shortURL, longURL: `${urlDatabase.b2xVn2}` };
   res.render("urls_show", templateVars);
 });
 
-app.post("/urls", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
-});
 
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
+
+app.get("/u/:shortURL", (req, res) => {
+  const shortURL = req.params['shortURL'];
+  const longURL = urlDatabase[shortURL];
+});

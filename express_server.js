@@ -54,22 +54,22 @@ app.post("/urls", (req, res) => {
 
 app.get("/urls", (req, res) => {
   console.log("In get url");
-  let userName = req.cookies["userName"];
-  console.log(userName);
-  if(typeof userName == 'undefined' || userName === null){
-    userName = null;
+  let user = req.cookies["user"];
+  console.log(user);
+  if(typeof user == 'undefined' || user === null){
+    user = null;
     console.log("In if to set username as null initially");
   }
-  const templateVars = { userName : req.cookies["userName"], 
+  const templateVars = { user : user, 
   urls: urlDatabase };
-  console.log("Set Vars for templates ",  templateVars.userName);
+  console.log("Set Vars for templates ",  templateVars.user);
   res.render("urls_index", templateVars);
 });
 
 
 app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params['shortURL'];
-  const templateVars = { userName : req.cookies["userName"], shortURL: shortURL, longURL: `${urlDatabase[shortURL]}` };
+  const templateVars = { user : req.cookies["user"], shortURL: shortURL, longURL: `${urlDatabase[shortURL]}` };
   res.render("urls_show", templateVars);
 });
 
@@ -102,7 +102,7 @@ app.post("/login",(req,res) => {
 
 app.post("/logout",(req,res) => {
   console.log("in /logout---" ,req.body);
-  res.clearCookie("userName");
+  res.clearCookie("user");
   res.redirect("/urls");
 });
 
@@ -111,13 +111,12 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register",(req,res) => {
-   console.log("in /login---" ,req.body);
    const id = generateRandomString();
    const usr = req.body.email;
    const password = req.body.password;
    const obj = {"id" : id, "email" : usr, "password" : password};
    users[id] = obj;
-   console.log("Set user    " , users);
-  res.cookie("userName", req.body.email);
+   console.log("User Added: " , users);
+  res.cookie("user", users[id]);
   res.redirect("/urls");
 });

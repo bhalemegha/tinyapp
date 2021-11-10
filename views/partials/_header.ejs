@@ -12,11 +12,11 @@
       </div>
     </div>
   
-    <% if (typeof usrName !== 'undefined' && usrName !== null) {%>
+    <% if (typeof usr !== 'undefined' && usr !== null) {%>
       <main style="margin: 1em;">
         <form class="form-inline" action="/logout" method="POST">
           <div class="form-group mb-2">            
-            <%= usrName %>
+            <%= usr.email %>
             <button type="submit" class="btn btn-primary">Logout</button>
           </div>
         </form>

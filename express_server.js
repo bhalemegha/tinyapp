@@ -13,6 +13,7 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+let users = {};
 //Getting random string of length 6
 function generateRandomString() {
   var str = '';
@@ -78,10 +79,6 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
-app.get("/register", (req, res) => {
-  res.render("registration_form");
-});
-
 app.post("/urls/:shortURL",(req,res) =>{
   const shortURL = req.params['shortURL'];
   console.log("Updating " + shortURL + " for " + urlDatabase[shortURL]);
@@ -109,3 +106,18 @@ app.post("/logout",(req,res) => {
   res.redirect("/urls");
 });
 
+app.get("/register", (req, res) => {
+  res.render("registration_form");
+});
+
+app.post("/register",(req,res) => {
+   console.log("in /login---" ,req.body);
+   const id = generateRandomString();
+   const usr = req.body.email;
+   const password = req.body.password;
+   const obj = {"id" : id, "email" : usr, "password" : password};
+   users[id] = obj;
+   console.log("Set user    " , users);
+  res.cookie("userName", req.body.email);
+  res.redirect("/urls");
+});

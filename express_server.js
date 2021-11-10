@@ -89,6 +89,7 @@ app.post("/urls/:shortURL/delete",(req,res) =>{
   const shortURL = req.params['shortURL'];
   console.log("Deleting " + shortURL + " for " + urlDatabase[shortURL]);
   delete urlDatabase[shortURL];
+  
   res.redirect("/urls");
 });
 
@@ -97,3 +98,10 @@ app.post("/login",(req,res) => {
   res.cookie("userName", req.body.userName);
   res.redirect("/urls");
 });
+
+app.post("/logout",(req,res) => {
+  console.log("in /logout---" ,req.body);
+  res.clearCookie("userName");
+  res.redirect("/urls");
+});
+

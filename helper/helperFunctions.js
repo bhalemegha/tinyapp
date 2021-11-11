@@ -55,8 +55,8 @@ const isValid = function (email, password) {
       || email === "" || password === "") {
       return false;
     }
-    return true;
   }
+  return true;
 }
 
 function isLoggedIn(user) {

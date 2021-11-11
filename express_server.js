@@ -1,6 +1,7 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const { generateRandomString, getUser, addUser, isValid, authenticateUser, isLoggedIn, urlsForUser } = require("./helper/helperFunctions");
+const bcrypt = require('bcryptjs');
 const { urlDatabase } = require("./data/tinyDB");
 //const bodyParser = require("body-parser");
 const app = express();
@@ -107,8 +108,7 @@ app.get("/login", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  const {email, password} = req.body; 
-  console.log("login post Req " + email + " " + password)
+  const {email, password} = req.body;
   const { cUser, error } = authenticateUser(email , password);
   if (error) {
     console.log(error);
@@ -135,9 +135,9 @@ app.post("/register", (req, res) => {
     res.statusCode = 400;
     return res.send(res.statusCode + " Not a valid request!");
   }
-  console.log({ email, password });
-
-  const  data = addUser(email, password);
+  const hashedPassword = bcrypt.hashSync(password);
+  const  data = addUser(email, hashedPassword);
+  console.log(hashedPassword);
 	res.cookie("user_id", data.id);
 	return res.redirect("/urls");
 });

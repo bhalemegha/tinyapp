@@ -5,6 +5,8 @@ const users = {
     'password' : 'test123'
   }
 };
+
+
 function generateRandomString() {
   var str = '';
   var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -53,4 +55,9 @@ const isValid = function (email, password) {
   }
 }
 
-module.exports = { generateRandomString, getUser, addUser, isValid, authenticateUser };
+function isLoggedIn(user) {
+  return Object.keys(user).length === 0;
+}
+
+
+module.exports = { generateRandomString, getUser, addUser, isValid, authenticateUser, isLoggedIn };

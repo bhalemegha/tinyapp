@@ -1,6 +1,6 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
-const { generateRandomString, isUser, addUser } = require("./helper/helperFunctions");
+const { generateRandomString, getUser, addUser, isValid, authenticateUser } = require("./helper/helperFunctions");
 
 //const bodyParser = require("body-parser");
 const app = express();
@@ -27,10 +27,10 @@ app.listen(PORT, () => {
 });
 
 app.get("/urls/new", (req, res) => {
-  //res.cookie("user", req.cookies["user"]);
-  const { user, error } = isUser(req.cookies["user"]);
+  const user = getUser(req.cookies["user_id"]);
+
   const templateVars = {
-    user: user
+    email: user.email
   };
   res.render("urls_new", templateVars);
 });
@@ -43,19 +43,21 @@ app.post("/urls", (req, res) => {
 
 
 app.get("/urls", (req, res) => {
-  const { user, error } = isUser(req.cookies["user"]);
+  const  user  = getUser(req.cookies["user_id"]);
   const templateVars = {
-    user: user,
+    user: user.id,
+    email:user.email,
     urls: urlDatabase
   };
-  console.log("Set Vars for templates ", templateVars.user);
+  console.log("Set Vars for templates ", templateVars[user]);
   res.render("urls_index", templateVars);
 });
 
 
 app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params['shortURL'];
-  const templateVars = { user: req.cookies["user"], shortURL: shortURL, longURL: `${urlDatabase[shortURL]}` };
+  const user = getUser(req.cookies["user_id"]);
+  const templateVars = { email: user.email, shortURL: shortURL, longURL: `${urlDatabase[shortURL]}` };
   res.render("urls_show", templateVars);
 });
 
@@ -80,15 +82,28 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect("/urls");
 });
 
+app.get("/login", (req, res) => {
+  const id = req.body;
+  const user = getUser(id);
+  const templateVars = { email:user.email };
+  res.render("login", templateVars);
+});
+
 app.post("/login", (req, res) => {
-  console.log("in /login---", req.body);
-  res.cookie("userName", req.body.userName);
-  res.redirect("/urls");
+  const {email, password} = req.body; 
+  console.log("login post Req " + email + " " + password)
+  const { cUser, error } = authenticateUser(email , password);
+  if (error) {
+    console.log(error);
+    return res.send("Not a Valid User");
+  }
+  res.cookie("user_id", cUser.id);
+  return res.redirect("/urls");
 });
 
 app.post("/logout", (req, res) => {
   console.log("in /logout---", req.body);
-  res.clearCookie("user");
+  res.clearCookie("user_id");
   res.redirect("/urls");
 });
 
@@ -97,10 +112,15 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  const { usr, password } = req.body;
-  const newUser = addUser(usr, password);
-  users[newUser.id] = newUser;
-  console.log("User Added: ", newUser);
-  res.cookie("user", users[newUser.id]);
-  res.redirect("/urls");
+  console.log(req.body);
+	const { email, password } = req.body;
+  if (!isValid(email,password)) {
+    res.statusCode = 400;
+    return res.send(res.statusCode + " Not a valid request!");
+  }
+  console.log({ email, password });
+
+  const  data = addUser(email, password);
+	res.cookie("user_id", data.id);
+	return res.redirect("/urls");
 });

@@ -16,20 +16,20 @@
       <main style="margin: 1em;">
         <form class="form-inline" action="/logout" method="POST">
           <div class="form-group mb-2">            
-            <%= usr.email %>
+            <%= usr %>
             <button type="submit" class="btn btn-primary">Logout</button>
           </div>
         </form>
       </main>
     <%} else {%>
       <main style="margin: 1em;">
-        <form class="form-inline" action="/login" method="POST">
-          <div class="form-group mb-2">
-            <input class="form-control" type="text" name="userName" style="width: 300px; margin: 1em" />
-            <button type="submit" class="btn btn-primary">Submit</button>
+        <form class="form-inline" action="/logout" method="POST">
+          <div class="form-group mb-2">  
+            <a href = "/register">Register&nbsp;&nbsp;</a>
+            <a href= "/login">LogIn</a>
           </div>
         </form>
-      </main>
-    <% } %>
+      </main>      
+      <%}%>
   </nav>
 </header>

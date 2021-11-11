@@ -1,3 +1,5 @@
+const { urlDatabase } = require("../data/tinyDB");
+
 const users = {
   dsdsd:{
     'id': 'dsdsd',
@@ -59,5 +61,17 @@ function isLoggedIn(user) {
   return Object.keys(user).length === 0;
 }
 
+const urlsForUser = function (id){//This function will filter the urls by user Id.
+  urlObj = {};
+  for (let url in urlDatabase) {
+    console.log(urlDatabase[url].longUrl)
+    if (urlDatabase[url].userId === id) {
+      urlObj[url] = urlDatabase[url].longUrl;
+    }
+  }
+  console.log("before return---", urlObj)
+  return urlObj;
+}
 
-module.exports = { generateRandomString, getUser, addUser, isValid, authenticateUser, isLoggedIn };
+
+module.exports = { generateRandomString, getUser, addUser, isValid, authenticateUser, isLoggedIn, urlsForUser };

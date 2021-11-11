@@ -1,19 +1,13 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
-const { generateRandomString, getUser, addUser, isValid, authenticateUser, isLoggedIn } = require("./helper/helperFunctions");
-
+const { generateRandomString, getUser, addUser, isValid, authenticateUser, isLoggedIn, urlsForUser } = require("./helper/helperFunctions");
+const { urlDatabase } = require("./data/tinyDB");
 //const bodyParser = require("body-parser");
 const app = express();
 const PORT = 8080; // default port 8080
 
 // set the view engine to ejs
 app.set('view engine', 'ejs');
-const urlDatabase = {
-  "b2xVn2": {longUrl : "http://www.lighthouselabs.ca", userId : "dsdsd"},
-  "9sm5xK": { longUrl : "http://www.google.com", userId : 'dhgsd' }
-};
-
-
 app.use(express.urlencoded({ extended: true })); //Used for body parser
 app.use(cookieParser());
 app.get("/", (req, res) => {
@@ -51,12 +45,16 @@ app.post("/urls", (req, res) => {
 
 app.get("/urls", (req, res) => {
   const  user  = getUser(req.cookies["user_id"]);
+  if(isLoggedIn(user)) {  //check if user is logged in, cookies will exist if already logged In.
+    return res.send("Please log in or register first");
+  }
+  const urls = urlsForUser(user.id);
   const templateVars = {
     user: user.id,
     email:user.email,
-    urls: urlDatabase
+    urls: urls
   };
-  console.log("Set Vars for templates ", templateVars[user]);
+  console.log("Set Vars for templates ", templateVars[urls]);
   res.render("urls_index", templateVars);
 });
 
@@ -64,6 +62,9 @@ app.get("/urls", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params['shortURL'];
   const user = getUser(req.cookies["user_id"]);
+  if(isLoggedIn(user)) {  //check if user is logged in, cookies will exist if already logged In.
+    return res.send("Please log in or register first");
+  }
   const templateVars = { email: user.email, shortURL: shortURL, longURL: `${urlDatabase[shortURL].longUrl}` };
   res.render("urls_show", templateVars);
 });
@@ -80,7 +81,8 @@ app.post("/urls/:shortURL", (req, res) => {
     return res.redirect("/register");
   }
   const shortURL = req.params['shortURL'];
-  console.log("Updating " + shortURL + " for " + urlDatabase[shortURL]);
+  console.log("Updating " + shortURL + " for " , urlDatabase[shortURL].longUrl);
+  console.log("Setting short url----" , req.body.longURL);
   urlDatabase[shortURL].longUrl = req.body.longURL;
   res.redirect("/urls");
 });

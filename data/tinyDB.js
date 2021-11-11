@@ -1,7 +1,8 @@
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": {longUrl : "http://www.lighthouselabs.ca", userId : "dsdsd"},
+  "9sm5xK": { longUrl : "http://www.google.com", userId : 'dhgsd' }
 };
+
 
 const users = {
   dsdsd:{

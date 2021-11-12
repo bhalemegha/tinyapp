@@ -1,14 +1,4 @@
-const { urlDatabase } = require("../data/tinyDB");
 const bcrypt = require('bcryptjs');
-
-const users = {
-  dsdsd:{
-    'id': 'dsdsd',
-    'email':'a@b.com',
-    'password' : 'test123'
-  }
-};
-
 
 function generateRandomString() {
   var str = '';
@@ -22,7 +12,7 @@ function generateRandomString() {
   return str;
 };
 
-const getUser = function (userId) {
+const getUser = function (userId, users) {
   const currentUser = users[userId];
   if (!currentUser) {
     return {};
@@ -30,7 +20,7 @@ const getUser = function (userId) {
   return currentUser;
 };
 
-const addUser = function (usr, password) {
+const addUser = function (usr, password, users) {
   const id = generateRandomString();
   const newUser = { "id": id, "email": usr, "password": password };
   users[id] = newUser;
@@ -38,7 +28,7 @@ const addUser = function (usr, password) {
   return newUser;
 };
 
-const authenticateUser = function(email, password) {  
+const authenticateUser = function(email, password, users) {  
   for (let usr in users) {
     if ((users[usr].email === email) && bcrypt.compareSync(password, users[usr].password)) {
       return {cUser : users[usr], error : null};
@@ -47,7 +37,7 @@ const authenticateUser = function(email, password) {
   return {cUser : null, error : "User not exist"};
 }
 
-const isValid = function (email, password) {
+const isValid = function (email, password, users) {
 
   for (let usr in users) {
     console.log((users[usr].email === email));
@@ -63,7 +53,7 @@ function isLoggedIn(user) {
   return Object.keys(user).length === 0;
 }
 
-const urlsForUser = function (id) {//This function will filter the urls by user Id.
+const urlsForUser = function (id, urlDatabase) {//This function will filter the urls by user Id.
   urlObj = {};
   for (let url in urlDatabase) {
     console.log(urlDatabase[url].longUrl)

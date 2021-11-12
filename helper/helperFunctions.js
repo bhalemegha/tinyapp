@@ -12,7 +12,8 @@ function generateRandomString() {
   return str;
 };
 
-const getUser = function (userId, users) {
+
+const getUser = function(userId, users) {
   const currentUser = users[userId];
   if (!currentUser) {
     return {};
@@ -20,24 +21,39 @@ const getUser = function (userId, users) {
   return currentUser;
 };
 
-const addUser = function (usr, password, users) {
+const addUser = function(usr, password, users) {
   const id = generateRandomString();
   const newUser = { "id": id, "email": usr, "password": password };
   users[id] = newUser;
-  console.log(JSON.stringify(users));
   return newUser;
 };
 
-const authenticateUser = function(email, password, users) {  
-  for (let usr in users) {
-    if ((users[usr].email === email) && bcrypt.compareSync(password, users[usr].password)) {
-      return {cUser : users[usr], error : null};
+const getUserByEmail = function(email, users) {
+  const values = Object.values(users);
+  for (let user of values) {
+    if (user.email === email) {
+      return user;
     }
   }
-  return {cUser : null, error : "User not exist"};
+  return;
 }
 
-const isValid = function (email, password, users) {
+const authenticateUser = function(email, password, users) {
+  const user = getUserByEmail(email, users);
+  if (!user) {
+    return { cUser: null, error: "User not exist" };
+  }
+
+  if (!(bcrypt.compareSync(password, user.password))) {
+    return { cUser: null, error: "User not exist" };
+  }
+
+  return { cUser: user, error: null };
+}
+
+
+
+const isValid = function(email, password, users) {
 
   for (let usr in users) {
     console.log((users[usr].email === email));
@@ -66,4 +82,4 @@ const urlsForUser = function (id, urlDatabase) {//This function will filter the 
 }
 
 
-module.exports = { generateRandomString, getUser, addUser, isValid, authenticateUser, isLoggedIn, urlsForUser };
+module.exports = { generateRandomString, getUser, addUser, isValid, authenticateUser, isLoggedIn, urlsForUser , getUserByEmail};

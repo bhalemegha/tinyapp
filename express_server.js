@@ -20,14 +20,14 @@ app.listen(PORT, () => {
 });
 
 app.get("/", (req, res) => {
-  res.redirect("/register");
+  res.redirect("/login");
 });
 
 app.get("/urls/new", (req, res) => {
   const user = getUser(req.session.user_id, users);
   //If we don't find User, means cookies not set . Hence user is not logged In. 
   if (isLoggedIn(user)) { //If user is not exist, redirect to register
-    return res.redirect("/register");
+    return res.redirect("/login");
   }
   const templateVars = {
     email: user.email
@@ -39,12 +39,13 @@ app.post("/urls", (req, res) => {
   const user = getUser(req.session.user_id, users);
   //Check if cookies exist to find if user is already loggedIn, if not, send to register page.
   if (isLoggedIn(user)) {
-    return res.redirect("/register");
+    return res.redirect("/login");
   }
   const shortStr = generateRandomString();  //generating short URl for Long URL
-  const newUrlObj = { longUrl: req.body['longURL'], userId: user.id };
+  const url = "http://" + req.body['longURL'];
+  const newUrlObj = { longUrl: url, userId: user.id };
   urlDatabase[shortStr] = newUrlObj;
-  res.redirect("/urls");
+  return res.redirect("/urls");
 });
 
 
@@ -60,7 +61,6 @@ app.get("/urls", (req, res) => {
     email: user.email,
     urls: urls
   };
-  console.log("Set Vars for templates ", templateVars['urls']);
   res.render("urls_index", templateVars);
 });
 
@@ -79,12 +79,10 @@ app.get("/urls/:shortURL", (req, res) => {
 app.get("/u/:shortURL", (req, res) => {
   const user = getUser(req.session.user_id, users);
   if (isLoggedIn(user)) {
-    return res.redirect("/register");
+    return res.redirect("/login");
   }
-  console.log(" To redirect corresponding url-----", req.params);
   const shortURL = req.params['shortURL'];
-  console.log(urlDatabase[shortURL] + " Short URL is " + shortURL);
-  const longURL = urlDatabase[shortURL].longUrl;
+  const longURL = "http://" + urlDatabase[shortURL].longUrl;
   res.redirect(longURL);
 });
 
@@ -92,7 +90,7 @@ app.get("/u/:shortURL", (req, res) => {
 app.post("/urls/:shortURL", (req, res) => {
   const user = getUser(req.session.user_id, users);
   if (isLoggedIn(user)) {
-    return res.redirect("/register");
+    return res.redirect("/login");
   }
   const shortURL = req.params['shortURL'];
   console.log("Updating " + shortURL + " for ", urlDatabase[shortURL].longUrl);
@@ -103,7 +101,7 @@ app.post("/urls/:shortURL", (req, res) => {
 app.post("/urls/:shortURL/delete", (req, res) => {
   const user = getUser(req.session.user_id, users);
   if (isLoggedIn(user)) {
-    return res.redirect("/register");
+    return res.redirect("/login");
   }
   const shortURL = req.params['shortURL'];
   console.log("Deleting " + shortURL + " for " + urlDatabase[shortURL]);
@@ -124,16 +122,15 @@ app.post("/login", (req, res) => {
   const { cUser, error } = authenticateUser(email, password, users);
   if (error) {
     console.log(error);
-    return res.send("Not a Valid User");
+    return res.send("Not a Valid User ");
   }
   req.session.user_id = cUser.id;
   return res.redirect("/urls");
 });
 
 app.post("/logout", (req, res) => {
-  console.log("in /logout---", req.body);
   req.session.user_id = null;
-  res.redirect("/urls");
+  return res.redirect("/urls");
 });
 
 app.get("/register", (req, res) => {
@@ -141,15 +138,25 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  console.log(req.body);
   const { email, password } = req.body;
-  if (!isValid(email, password)) {
-    res.statusCode = 400;
-    return res.send(res.statusCode + " Not a valid request!");
+  const {cUser, error} = authenticateUser(email, password, users)
+  console.log(cUser);
+  if(cUser || email === null || password === null || email.trim().length === 0 
+     || password.trim().length === 0){
+       res.statusCode = 400;
+      return res.send(res.statusCode + " Not a valid request!");   
   }
+  // if(curUser || email === null || password === null || email.trim().length === 0 
+  //   || password.trim().length === 0){
+  //     res.statusCode = 400;
+  //     return res.send(res.statusCode + " Not a valid request!");
+  // }
   const hashedPassword = bcrypt.hashSync(password);
+  console.log(hashedPassword);
   const user = addUser(email, hashedPassword, users);
   console.log(hashedPassword);
   req.session.user_id = user.id;
   return res.redirect("/urls");
 });
+
+app.get("*",(req,res) => res.redirect("/login"));

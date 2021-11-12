@@ -82,4 +82,4 @@ const urlsForUser = function (id, urlDatabase) {//This function will filter the 
 }
 
 
-module.exports = { generateRandomString, getUser, addUser, isValid, authenticateUser, isLoggedIn, urlsForUser , getUserByEmail};
+module.exports = { generateRandomString, getUser, addUser, isValid, authenticateUser, isLoggedIn, urlsForUser , getUserByEmail, getUserByEmail};

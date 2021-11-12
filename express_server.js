@@ -1,6 +1,6 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
-const { generateRandomString, getUser, addUser, isValid, authenticateUser, isLoggedIn, urlsForUser } = require("./helper/helperFunctions");
+const { generateRandomString, getUser, addUser, isValid, authenticateUser, isLoggedIn, urlsForUser, getUserByEmail } = require("./helper/helperFunctions");
 const bcrypt = require('bcryptjs');
 var cookieSession = require('cookie-session')
 const {urlDatabase, users } = require("./data/tinyDB");
@@ -139,22 +139,14 @@ app.get("/register", (req, res) => {
 
 app.post("/register", (req, res) => {
   const { email, password } = req.body;
-  const {cUser, error} = authenticateUser(email, password, users)
-  console.log(cUser);
-  if(cUser || email === null || password === null || email.trim().length === 0 
+  const cUser = getUserByEmail(email, users)
+  if( cUser || email === null || password === null || email.trim().length === 0 
      || password.trim().length === 0){
        res.statusCode = 400;
       return res.send(res.statusCode + " Not a valid request!");   
   }
-  // if(curUser || email === null || password === null || email.trim().length === 0 
-  //   || password.trim().length === 0){
-  //     res.statusCode = 400;
-  //     return res.send(res.statusCode + " Not a valid request!");
-  // }
   const hashedPassword = bcrypt.hashSync(password);
-  console.log(hashedPassword);
   const user = addUser(email, hashedPassword, users);
-  console.log(hashedPassword);
   req.session.user_id = user.id;
   return res.redirect("/urls");
 });

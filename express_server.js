@@ -1,9 +1,8 @@
 const express = require("express");
-const cookieParser = require("cookie-parser");
-const { generateRandomString, getUser, addUser, isValid, authenticateUser, isLoggedIn, urlsForUser, getUserByEmail } = require("./helper/helperFunctions");
+const { generateRandomString, getUser, addUser, isValid, authenticateUser, isLoggedIn, urlsForUser, getUserByEmail, getLongUrlForUser, getNewUrl } = require("./helper/helperFunctions");
 const bcrypt = require('bcryptjs');
 var cookieSession = require('cookie-session')
-const {urlDatabase, users } = require("./data/tinyDB");
+const { urlDatabase, users } = require("./data/tinyDB");
 const app = express();
 const PORT = 8080; // default port 8080
 
@@ -14,10 +13,6 @@ app.use(cookieSession({ //used for session cookies
   name: 'session',
   keys: ['key1', 'key2']
 }))
-
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
-});
 
 app.get("/", (req, res) => {
   res.redirect("/login");
@@ -42,8 +37,9 @@ app.post("/urls", (req, res) => {
     return res.redirect("/login");
   }
   const shortStr = generateRandomString();  //generating short URl for Long URL
-  const url = "http://" + req.body['longURL'];
-  const newUrlObj = { longUrl: url, userId: user.id };
+  const url = req.body['longURL'];
+  const longUrl = getNewUrl(url);//Add http only if not added to url earlier
+  const newUrlObj = { longUrl: longUrl, userId: user.id };
   urlDatabase[shortStr] = newUrlObj;
   return res.redirect("/urls");
 });
@@ -51,7 +47,7 @@ app.post("/urls", (req, res) => {
 
 app.get("/urls", (req, res) => {
 
-  const user = getUser (req.session.user_id,users);
+  const user = getUser(req.session.user_id, users);
   if (isLoggedIn(user)) {  //check if user is logged in, cookies will exist if already logged In.
     return res.send("Please log in or register first");
   }
@@ -71,7 +67,11 @@ app.get("/urls/:shortURL", (req, res) => {
   if (isLoggedIn(user)) {  //check if user is logged in, cookies will exist if already logged In.
     return res.send("Please log in or register first");
   }
-  const templateVars = { email: user.email, shortURL: shortURL, longURL: urlDatabase[shortURL].longUrl };
+  const longUrl = getLongUrlForUser(user.id, urlDatabase, shortURL);
+  if (!longUrl) {
+    return res.send("Bad request");
+  }
+  const templateVars = { email: user.email, shortURL: shortURL, longURL: longUrl };
   res.render("urls_show", templateVars);
 });
 
@@ -82,7 +82,7 @@ app.get("/u/:shortURL", (req, res) => {
     return res.redirect("/login");
   }
   const shortURL = req.params['shortURL'];
-  const longURL = "http://" + urlDatabase[shortURL].longUrl;
+  const longURL = urlDatabase[shortURL].longUrl;
   res.redirect(longURL);
 });
 
@@ -93,8 +93,8 @@ app.post("/urls/:shortURL", (req, res) => {
     return res.redirect("/login");
   }
   const shortURL = req.params['shortURL'];
-  console.log("Updating " + shortURL + " for ", urlDatabase[shortURL].longUrl);
-  urlDatabase[shortURL].longUrl = req.body.longURL; //updated longUrl
+  const longUrl = getNewUrl(req.body.longURL);//Add http only if not added to url earlier
+  urlDatabase[shortURL].longUrl = longUrl; //updated longUrl
   res.redirect("/urls");
 });
 
@@ -119,6 +119,9 @@ app.get("/login", (req, res) => {
 
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
+  if (!(email && password)) {
+    return res.send("Username or password fields are blank. Please fill in.");
+  }
   const { cUser, error } = authenticateUser(email, password, users);
   if (error) {
     console.log(error);
@@ -139,11 +142,13 @@ app.get("/register", (req, res) => {
 
 app.post("/register", (req, res) => {
   const { email, password } = req.body;
+  if (!(email && password)) {
+    return res.send("Username or password fields are blank. Please fill in.");
+  }
   const cUser = getUserByEmail(email, users)
-  if( cUser || email === null || password === null || email.trim().length === 0 
-     || password.trim().length === 0){
-       res.statusCode = 400;
-      return res.send(res.statusCode + " Not a valid request!");   
+  if (cUser) {
+    res.statusCode = 400;
+    return res.send(res.statusCode + " Not a valid request!");
   }
   const hashedPassword = bcrypt.hashSync(password);
   const user = addUser(email, hashedPassword, users);
@@ -151,4 +156,8 @@ app.post("/register", (req, res) => {
   return res.redirect("/urls");
 });
 
-app.get("*",(req,res) => res.redirect("/login"));
+app.get("*", (req, res) => res.redirect("/login"));
+
+app.listen(PORT, () => {
+  console.log(`Server started....Tiny app listening on port ${PORT}!`);
+});

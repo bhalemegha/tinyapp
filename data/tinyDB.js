@@ -7,7 +7,7 @@ const users = {
   dsdsd:{
     'id': 'dsdsd',
     'email':'a@b.com',
-    'password' : 'test123'
+    'password' : '12'   
   } ,
    dhgsd:{
     'id': 'dhgsd',

@@ -54,9 +54,7 @@ const authenticateUser = function(email, password, users) {
 
 
 const isValid = function(email, password, users) {
-
   for (let usr in users) {
-    console.log((users[usr].email === email));
     if (((users[usr].email === email))
       || email === "" || password === "") {
       return false;
@@ -69,17 +67,29 @@ function isLoggedIn(user) {
   return Object.keys(user).length === 0;
 }
 
-const urlsForUser = function (id, urlDatabase) {//This function will filter the urls by user Id.
+const urlsForUser = function(id, urlDatabase) {//This function will filter the urls by user Id.
   urlObj = {};
   for (let url in urlDatabase) {
-    console.log(urlDatabase[url].longUrl)
     if (urlDatabase[url].userId === id) {
       urlObj[url] = urlDatabase[url].longUrl;
     }
   }
-  console.log("before return---", urlObj)
   return urlObj;
 }
 
+const getLongUrlForUser = function(userId, urlDatabase, shortUrl) {
+  const urls = urlsForUser(userId, urlDatabase)
+  if (!urls) {
+    return {};
+  }
+  return urls[shortUrl];
+}
 
-module.exports = { generateRandomString, getUser, addUser, isValid, authenticateUser, isLoggedIn, urlsForUser , getUserByEmail, getUserByEmail};
+const getNewUrl = function(url) {
+  if (!(url.includes("http"))) {
+    return "http://" + url
+  }
+  return url;
+}
+
+module.exports = { generateRandomString, getUser, addUser, isValid, authenticateUser, isLoggedIn, urlsForUser, getUserByEmail, getUserByEmail, getLongUrlForUser, getNewUrl };

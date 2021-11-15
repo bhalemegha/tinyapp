@@ -1,7 +1,7 @@
 const express = require("express");
-const { generateRandomString, getUser, addUser, isValid, authenticateUser, isLoggedIn, urlsForUser, getUserByEmail, getLongUrlForUser, getNewUrl } = require("./helper/helperFunctions");
+const { generateRandomString, getUser, addUser, authenticateUser, isLoggedIn, urlsForUser, getUserByEmail, getLongUrlForUser, getNewUrl } = require("./helper/helperFunctions");
 const bcrypt = require('bcryptjs');
-var cookieSession = require('cookie-session')
+const cookieSession = require('cookie-session');
 const { urlDatabase, users } = require("./data/tinyDB");
 const app = express();
 const PORT = 8080; // default port 8080
@@ -12,7 +12,7 @@ app.use(express.urlencoded({ extended: true })); //Used for body parser
 app.use(cookieSession({ //used for session cookies
   name: 'session',
   keys: ['key1', 'key2']
-}))
+}));
 
 app.get("/", (req, res) => {
   res.redirect("/login");
@@ -20,7 +20,7 @@ app.get("/", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   const user = getUser(req.session.user_id, users);
-  //If we don't find User, means cookies not set . Hence user is not logged In. 
+  //If we don't find User, means cookies not set . Hence user is not logged In.
   if (isLoggedIn(user)) { //If user is not exist, redirect to register
     return res.redirect("/login");
   }
@@ -145,7 +145,7 @@ app.post("/register", (req, res) => {
   if (!(email && password)) {
     return res.send("Username or password fields are blank. Please fill in.");
   }
-  const cUser = getUserByEmail(email, users)
+  const cUser = getUserByEmail(email, users);
   if (cUser) {
     res.statusCode = 400;
     return res.send(res.statusCode + " Not a valid request!");
